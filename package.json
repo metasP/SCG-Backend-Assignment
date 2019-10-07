@@ -1,0 +1,32 @@
+{
+  "name": "scg-backend-assignment",
+  "version": "0.0.1",
+  "description": "Backend Assignment for SCG",
+  "main": "app.js",
+  "scripts": {
+    "dev": "node app.js",
+    "standard": "standard src/main/*.js",
+    "test": "mocha src/test --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metasP/SCG-Backend-Assignment.git"
+  },
+  "author": "Metas Phongmetha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/metasP/SCG-Backend-Assignment/issues"
+  },
+  "homepage": "https://github.com/metasP/SCG-Backend-Assignment#readme",
+  "dependencies": {
+    "@google/maps": "^1.0.1",
+    "express": "^4.17.1",
+    "memoizee": "^0.4.14",
+    "underscore": "^1.9.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.1",
+    "standard": "^14.3.1"
+  }
+}
