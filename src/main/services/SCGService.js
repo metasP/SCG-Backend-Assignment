@@ -1,5 +1,10 @@
 const memoize = require('memoizee')
 const _ = require('underscore')
+const config = require('../../../config/Config')
+const googleMapsClient = require('@google/maps').createClient({
+  key: config.googleMapAPIKey,
+  Promise: Promise,
+})
 
 let input = 'X,5,9,15,23,Y,Z' // for test
 /*
@@ -9,7 +14,7 @@ let input = 'X,5,9,15,23,Y,Z' // for test
 
   ref-> https://stackoverflow.com/questions/2465196/algorithm-to-find-the-next-number-in-a-sequence
  */
-findNumberFromSequencePattern = ({inputString}) => {
+findNumberFromSequencePattern = ({ inputString }) => {
   if (!inputString) return {}
   let numberArray = inputString.split(',')
   let needToFind = []
@@ -20,10 +25,11 @@ findNumberFromSequencePattern = ({inputString}) => {
   let tempStartIndex = null
   let endIndex = null
   let tempEndIndex = null
-  for(let i = 0; i < numberArray.length; i++) {
+  for (let i = 0; i < numberArray.length; i++) {
     let number = numberArray[i]
-    if (isNaN(+number) || (rawSequence.length < 1 && i === numberArray.length-1)) {
-      let object = Object.assign({}, {char: number, index: i})
+    if (isNaN(+number) ||
+      (rawSequence.length < 1 && i === numberArray.length - 1)) {
+      let object = Object.assign({}, { char: number, index: i })
       needToFind.push(object)
       if (rawSequence.length < tempRawSequence.length) {
         rawSequence = tempRawSequence
@@ -45,11 +51,13 @@ findNumberFromSequencePattern = ({inputString}) => {
   let result = {}
   for (let obj of needToFind) {
     let indexToFind = obj.index
-    let constance = findSequenceConstance({arrayOfArraySequence: tempArray})
+    let constance = findSequenceConstance({ arrayOfArraySequence: tempArray })
     if (indexToFind < startIndex) {
-      result[obj.char] = findPreviousNumber({arrayOfArraySequence: tempArray, constance})
+      result[obj.char] = findPreviousNumber(
+        { arrayOfArraySequence: tempArray, constance })
     } else {
-      result[obj.char] = findNextNumber({arrayOfArraySequence: tempArray, constance})
+      result[obj.char] = findNextNumber(
+        { arrayOfArraySequence: tempArray, constance })
     }
     rawSequence.splice(indexToFind, 0, result[obj.char])
     tempArray = []
@@ -58,10 +66,10 @@ findNumberFromSequencePattern = ({inputString}) => {
   return result
 }
 
-findSequenceConstance = ({arrayOfArraySequence}) => {
+findSequenceConstance = ({ arrayOfArraySequence }) => {
   let currentSequenceRow = 0
   let tempArray = arrayOfArraySequence
-  while(true) {
+  while (true) {
     let sequence = tempArray[currentSequenceRow]
     if (sequence.length < 1) break
     let nextSequenceRow = []
@@ -85,12 +93,12 @@ findSequenceConstance = ({arrayOfArraySequence}) => {
   }
 }
 
-findNextNumber = ({arrayOfArraySequence, constance}) => {
+findNextNumber = ({ arrayOfArraySequence, constance }) => {
   let currentSequenceRow = arrayOfArraySequence.length - 1
   let _constance = constance
-  while(true) {
+  while (true) {
     let currentSequence = arrayOfArraySequence[currentSequenceRow]
-    _constance = +currentSequence[currentSequence.length-1] + _constance
+    _constance = +currentSequence[currentSequence.length - 1] + _constance
     if (currentSequenceRow === 0) {
       return +_constance
     } else {
@@ -99,10 +107,10 @@ findNextNumber = ({arrayOfArraySequence, constance}) => {
   }
 }
 
-findPreviousNumber = ({arrayOfArraySequence, constance}) => {
+findPreviousNumber = ({ arrayOfArraySequence, constance }) => {
   let currentSequenceRow = arrayOfArraySequence.length - 1
   let _constance = constance
-  while(true) {
+  while (true) {
     let currentSequence = arrayOfArraySequence[currentSequenceRow]
     _constance = +currentSequence[0] - _constance
     if (currentSequenceRow === 0) {
@@ -113,8 +121,24 @@ findPreviousNumber = ({arrayOfArraySequence, constance}) => {
   }
 }
 
+searchPlace = ({ keyword }) => {
+  return new Promise(function (resolve, reject) {
+    googleMapsClient.placesNearby({
+      keyword: keyword,
+      type: 'restaurant',
+      location: ['13.8234847', '100.4906102'], // lat long of Bangsue
+      radius: 1500, // within 1500m
+    }).asPromise().then((response) => {
+      resolve(response.json.results)
+    }).catch((err) => {
+      reject(err)
+    })
+  })
+}
+
 const SCGService = {
   findNumberFromSequencePattern: memoize(findNumberFromSequencePattern),
+  searchPlace: memoize(searchPlace),
 }
 
 module.exports = SCGService
